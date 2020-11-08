@@ -19,11 +19,11 @@
         ><b-button v-on:click="add_key">Add</b-button>
         <b-table striped hover :fields="fields" :items="keys">
           <template #cell(actions)="row">
-            <b-icon-arrow-up v-on:click="move(row.index, -1)"></b-icon-arrow-up>
+            <b-icon-arrow-up v-on:click="move_key(row.index, -1)"></b-icon-arrow-up>
             <b-icon-arrow-down
-              v-on:click="move(row.index, 1)"
+              v-on:click="move_key(row.index, 1)"
             ></b-icon-arrow-down>
-            <b-icon-trash v-on:click="remove(row.index)"></b-icon-trash>
+            <b-icon-trash v-on:click="remove_key(row.index)"></b-icon-trash>
           </template>
         </b-table>
       </div>
@@ -53,7 +53,7 @@ export default {
       });
       this.key = "";
     },
-    move: function(index, diff) {
+    move_key: function(index, diff) {
       const targetId = index + diff;
       if (targetId < 0 || targetId >= this.keys.length) {
         return;
@@ -67,7 +67,7 @@ export default {
       this.keys = cloneArray;
       return;
     },
-    remove: function(index) {
+    remove_key: function(index) {
       const cloneArray = [...this.keys];
       cloneArray.splice(index, 1);
       this.keys = cloneArray;
