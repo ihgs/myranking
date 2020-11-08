@@ -17,13 +17,30 @@
       <div>
         <b-form-input v-model="key"></b-form-input
         ><b-button v-on:click="add_key">Add</b-button>
-        <b-table striped hover :fields="fields" :items="keys">
+        <b-table striped hover :fields="key_fields" :items="keys">
           <template #cell(actions)="row">
-            <b-icon-arrow-up v-on:click="move_key(row.index, -1)"></b-icon-arrow-up>
+            <b-icon-arrow-up
+              v-on:click="move_key(row.index, -1)"
+            ></b-icon-arrow-up>
             <b-icon-arrow-down
               v-on:click="move_key(row.index, 1)"
             ></b-icon-arrow-down>
             <b-icon-trash v-on:click="remove_key(row.index)"></b-icon-trash>
+          </template>
+        </b-table>
+      </div>
+      <div>
+        <b-form-input v-model="target"></b-form-input>
+        <b-button v-on:click="add_target">Add</b-button>
+        <b-table striped hover :fields="target_fields" :items="targets">
+          <template #cell(actions)="row">
+            <b-icon-arrow-up
+              v-on:click="move_target(row.index, -1)"
+            ></b-icon-arrow-up>
+            <b-icon-arrow-down
+              v-on:click="move_target(row.index, 1)"
+            ></b-icon-arrow-down>
+            <b-icon-trash v-on:click="remove_target(row.index)"></b-icon-trash>
           </template>
         </b-table>
       </div>
@@ -36,11 +53,14 @@ export default {
   name: "Ranking",
   data: function() {
     return {
-      fields: ["key", "actions"],
+      key_fields: ["key", "actions"],
+      target_fields: ["target", "actions"],
       title: "Test",
       edit_title: false,
       keys: [{ key: "aaa" }, { key: "bbb" }],
-      key: ""
+      key: "",
+      targets: [{ target: "AAAA" }, { target: "CCCC" }, { target: "DDDD" }],
+      target: ""
     };
   },
   methods: {
@@ -71,6 +91,31 @@ export default {
       const cloneArray = [...this.keys];
       cloneArray.splice(index, 1);
       this.keys = cloneArray;
+    },
+    add_target: function() {
+      this.targets.push({
+        target: this.target
+      });
+      this.target = "";
+    },
+    move_target: function(index, diff) {
+      const targetId = index + diff;
+      if (targetId < 0 || targetId >= this.targets.length) {
+        return;
+      }
+      const sourceId = index;
+      const cloneArray = [...this.targets];
+      [cloneArray[targetId], cloneArray[sourceId]] = [
+        this.targets[sourceId],
+        this.targets[targetId]
+      ];
+      this.targets = cloneArray;
+      return;
+    },
+    remove_target: function(index) {
+      const cloneArray = [...this.targets];
+      cloneArray.splice(index, 1);
+      this.targets = cloneArray;
     }
   }
 };
