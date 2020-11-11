@@ -14,6 +14,8 @@
         ></b-form-input>
         <b-link v-on:click="switch_edit_title">save</b-link>
       </div>
+      <b-button v-b-modal.key_settings>Key Settings</b-button>
+      <b-modal id="key_settings" title="Key Settings" ok-only>
       <div>
         <b-form-input v-model="key"></b-form-input
         ><b-button v-on:click="add_key">Add</b-button>
@@ -29,6 +31,10 @@
           </template>
         </b-table>
       </div>
+      </b-modal>
+      <b-button v-b-modal.target_settings>Target Settings</b-button>
+      <b-modal id="target_settings" title="Target Settings" ok-only>
+      
       <div>
         <b-form-input v-model="target"></b-form-input>
         <b-button v-on:click="add_target">Add</b-button>
@@ -44,6 +50,7 @@
           </template>
         </b-table>
       </div>
+      </b-modal>
       <div>
         <b-table striped hover :fields="ranking_header" :items="ranking_body">
           <template
@@ -83,7 +90,7 @@ export default {
       target_fields: ["target", "actions"],
       title: "Test",
       edit_title: false,
-      keys: [{ key: "aaa" }, { key: "bbb" }],
+      keys: [{ key: "aaa" }, { key: "bbb" }, {key: "ccc"}],
       key: "",
       targets: [{ target: "AAAA" }, { target: "CCCC" }, { target: "DDDD" }],
       target: "",
@@ -98,7 +105,7 @@ export default {
           CCCC: { point: "5", description: "e" },
           DDDD: { point: "6", description: "f" }
         },
-        CCCC: {
+        ccc: {
           AAAA: { point: "9", description: "g" },
           CCCC: { point: "8", description: "h" },
           DDDD: { point: "7", description: "i" }
@@ -160,8 +167,11 @@ export default {
     },
     remove_key: function(index) {
       const cloneArray = [...this.keys];
+      const key = this.keys[index]
       cloneArray.splice(index, 1);
       this.keys = cloneArray;
+      console.log(key)
+      delete this.contents[key.key]
     },
     add_target: function() {
       this.targets.push({
@@ -185,8 +195,14 @@ export default {
     },
     remove_target: function(index) {
       const cloneArray = [...this.targets];
+      const t = this.targets[index].target;
+      Object.keys(this.contents).forEach(k=>{
+        const con = this.contents[k];
+        delete con[t];
+      })
       cloneArray.splice(index, 1);
       this.targets = cloneArray;
+      
     },
     slotname: function(field) {
       return "cell(" + field + ")";
