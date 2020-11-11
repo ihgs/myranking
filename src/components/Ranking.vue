@@ -85,7 +85,7 @@ export default {
       key: "",
       targets: [{ target: "AAAA" }, { target: "CCCC" }, { target: "DDDD" }],
       target: "",
-      contents: {}
+      contents: {"aaa":{"AAAA":{"point":"1","description":"a"},"CCCC":{"point":"2","description":"b"},"DDDD":{"point":"3","description":"c"}},"bbb":{"AAAA":{"point":"4","description":"d"},"CCCC":{"point":"5","description":"e"},"DDDD":{"point":"6","description":"f"}}}
     };
   },
   computed: {
