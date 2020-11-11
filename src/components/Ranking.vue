@@ -16,40 +16,41 @@
       </div>
       <b-button v-b-modal.key_settings>Key Settings</b-button>
       <b-modal id="key_settings" title="Key Settings" ok-only>
-      <div>
-        <b-form-input v-model="key"></b-form-input
-        ><b-button v-on:click="add_key">Add</b-button>
-        <b-table striped hover :fields="key_fields" :items="keys">
-          <template #cell(actions)="row">
-            <b-icon-arrow-up
-              v-on:click="move_key(row.index, -1)"
-            ></b-icon-arrow-up>
-            <b-icon-arrow-down
-              v-on:click="move_key(row.index, 1)"
-            ></b-icon-arrow-down>
-            <b-icon-trash v-on:click="remove_key(row.index)"></b-icon-trash>
-          </template>
-        </b-table>
-      </div>
+        <div>
+          <b-form-input v-model="key"></b-form-input
+          ><b-button v-on:click="add_key">Add</b-button>
+          <b-table striped hover :fields="key_fields" :items="keys">
+            <template #cell(actions)="row">
+              <b-icon-arrow-up
+                v-on:click="move_key(row.index, -1)"
+              ></b-icon-arrow-up>
+              <b-icon-arrow-down
+                v-on:click="move_key(row.index, 1)"
+              ></b-icon-arrow-down>
+              <b-icon-trash v-on:click="remove_key(row.index)"></b-icon-trash>
+            </template>
+          </b-table>
+        </div>
       </b-modal>
       <b-button v-b-modal.target_settings>Target Settings</b-button>
       <b-modal id="target_settings" title="Target Settings" ok-only>
-      
-      <div>
-        <b-form-input v-model="target"></b-form-input>
-        <b-button v-on:click="add_target">Add</b-button>
-        <b-table striped hover :fields="target_fields" :items="targets">
-          <template #cell(actions)="row">
-            <b-icon-arrow-up
-              v-on:click="move_target(row.index, -1)"
-            ></b-icon-arrow-up>
-            <b-icon-arrow-down
-              v-on:click="move_target(row.index, 1)"
-            ></b-icon-arrow-down>
-            <b-icon-trash v-on:click="remove_target(row.index)"></b-icon-trash>
-          </template>
-        </b-table>
-      </div>
+        <div>
+          <b-form-input v-model="target"></b-form-input>
+          <b-button v-on:click="add_target">Add</b-button>
+          <b-table striped hover :fields="target_fields" :items="targets">
+            <template #cell(actions)="row">
+              <b-icon-arrow-up
+                v-on:click="move_target(row.index, -1)"
+              ></b-icon-arrow-up>
+              <b-icon-arrow-down
+                v-on:click="move_target(row.index, 1)"
+              ></b-icon-arrow-down>
+              <b-icon-trash
+                v-on:click="remove_target(row.index)"
+              ></b-icon-trash>
+            </template>
+          </b-table>
+        </div>
       </b-modal>
       <div>
         <b-table striped hover :fields="ranking_header" :items="ranking_body">
@@ -73,6 +74,7 @@
             </div>
           </template>
         </b-table>
+        <b-button v-on:click="save">Save</b-button>
         <b-button v-on:click="show_graph">Shwo graph</b-button>
         <div id="viz"></div>
       </div>
@@ -90,28 +92,26 @@ export default {
       target_fields: ["target", "actions"],
       title: "Test",
       edit_title: false,
-      keys: [{ key: "aaa" }, { key: "bbb" }, {key: "ccc"}],
+      keys: [],
       key: "",
-      targets: [{ target: "AAAA" }, { target: "CCCC" }, { target: "DDDD" }],
+      targets: [],
       target: "",
-      contents: {
-        aaa: {
-          AAAA: { point: "1", description: "a" },
-          CCCC: { point: "2", description: "b" },
-          DDDD: { point: "3", description: "c" }
-        },
-        bbb: {
-          AAAA: { point: "4", description: "d" },
-          CCCC: { point: "5", description: "e" },
-          DDDD: { point: "6", description: "f" }
-        },
-        ccc: {
-          AAAA: { point: "9", description: "g" },
-          CCCC: { point: "8", description: "h" },
-          DDDD: { point: "7", description: "i" }
-        }
-      }
+      contents: {}
     };
+  },
+  created: function() {
+    const savedData = localStorage.getItem("default");
+    if (savedData) {
+      const tmp = JSON.parse(savedData);
+      this.title = tmp.title;
+      this.contents = tmp.contents;
+      Object.keys(this.contents).forEach(k => {
+        this.keys.push({ key: k });
+        Object.keys(this.contents[k]).forEach(t => {
+          this.targets.push({ target: t });
+        });
+      });
+    }
   },
   computed: {
     ranking_header: function() {
@@ -167,11 +167,11 @@ export default {
     },
     remove_key: function(index) {
       const cloneArray = [...this.keys];
-      const key = this.keys[index]
+      const key = this.keys[index];
       cloneArray.splice(index, 1);
       this.keys = cloneArray;
-      console.log(key)
-      delete this.contents[key.key]
+      console.log(key);
+      delete this.contents[key.key];
     },
     add_target: function() {
       this.targets.push({
@@ -196,16 +196,22 @@ export default {
     remove_target: function(index) {
       const cloneArray = [...this.targets];
       const t = this.targets[index].target;
-      Object.keys(this.contents).forEach(k=>{
+      Object.keys(this.contents).forEach(k => {
         const con = this.contents[k];
         delete con[t];
-      })
+      });
       cloneArray.splice(index, 1);
       this.targets = cloneArray;
-      
     },
     slotname: function(field) {
       return "cell(" + field + ")";
+    },
+    save: function() {
+      const saveData = {
+        title: this.title,
+        contents: this.contents
+      };
+      localStorage.setItem("default", JSON.stringify(saveData));
     },
     show_graph: function() {
       console.log(this.contents);
@@ -409,14 +415,6 @@ export default {
         ]
       };
       await embed("#viz", def, { actions: false });
-    }
-  },
-  watch: {
-    contents: {
-      handler: function(val, oldVal) {
-        console.log(val + "+" + oldVal);
-      },
-      deep: true
     }
   }
 };
