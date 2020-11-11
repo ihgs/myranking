@@ -12,6 +12,9 @@
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.18.1",
     "core-js": "^3.6.5",
+    "vega": "^5.17.0",
+    "vega-embed": "^6.13.0",
+    "vega-lite": "^4.17.0",
     "vue": "^2.6.12",
     "vue-router": "^3.2.0"
   },
