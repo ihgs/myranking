@@ -44,6 +44,30 @@
           </template>
         </b-table>
       </div>
+      <div>
+        <b-table striped hover :fields="ranking_header" :items="ranking_body">
+          <template
+            v-for="field in ranking_header"
+            v-slot:[slotname(field)]="data"
+          >
+            <div v-if="data.field.key == 'key'" :key="field">
+              {{ data.item.key }}
+            </div>
+            <div v-else :key="field">
+              <b-form-input
+                v-model="contents[data.item.key][data.field.key].point"
+                type="number"
+                placeholder="point"
+              ></b-form-input>
+              <b-form-input
+                v-model="contents[data.item.key][data.field.key].description"
+                placeholder="備考"
+              ></b-form-input>
+            </div>
+          </template>
+        </b-table>
+        <b-button v-on:click="show_graph">Shwo graph</b-button>
+      </div>
     </b-container>
   </div>
 </template>
@@ -60,8 +84,37 @@ export default {
       keys: [{ key: "aaa" }, { key: "bbb" }],
       key: "",
       targets: [{ target: "AAAA" }, { target: "CCCC" }, { target: "DDDD" }],
-      target: ""
+      target: "",
+      contents: {}
     };
+  },
+  computed: {
+    ranking_header: function() {
+      const tmp = ["key"];
+      this.targets.forEach(t => {
+        tmp.push(t.target);
+      });
+      return tmp;
+    },
+    ranking_body: function() {
+      const table_data = [];
+      this.keys.forEach(key => {
+        const keyIndex = key.key;
+        const row = { key: keyIndex };
+
+        this.targets.forEach(target => {
+          if (!this.contents[keyIndex]) {
+            this.contents[keyIndex] = {};
+          }
+          if (!this.contents[keyIndex][target.target]) {
+            this.contents[keyIndex][target.target] = {};
+          }
+          row[target.target] = "";
+        });
+        table_data.push(row);
+      });
+      return table_data;
+    }
   },
   methods: {
     switch_edit_title: function() {
@@ -116,6 +169,20 @@ export default {
       const cloneArray = [...this.targets];
       cloneArray.splice(index, 1);
       this.targets = cloneArray;
+    },
+    slotname: function(field) {
+      return "cell(" + field + ")";
+    },
+    show_graph: function() {
+      console.log(this.contents);
+    }
+  },
+  watch: {
+    contents: {
+      handler: function(val, oldVal) {
+        console.log(val + "+" + oldVal);
+      },
+      deep: true
     }
   }
 };
