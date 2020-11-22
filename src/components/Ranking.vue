@@ -1,8 +1,24 @@
 <template>
   <div class="ranking">
+    <b-button v-b-modal.list_saved_data v-on:click="refresh_list"
+      >Load</b-button
+    >
+    <b-modal id="list_saved_data" title="saved_data" @ok="loadData">
+      <b-table
+        striped
+        hover
+        :items="list_saved_data"
+        show-empty
+        selectable
+        select-mode="single"
+        @row-selected="onRowSelected"
+      >
+      </b-table>
+      {{ this.selected }}
+    </b-modal>
     <b-container>
       <div v-if="!edit_title">
-        <div>{{ title }}</div>
+        <span class="title">{{ title }}</span>
         <b-link v-on:click="switch_edit_title">edit</b-link>
       </div>
       <div v-else>
@@ -84,6 +100,7 @@
 
 <script>
 import embed from "vega-embed";
+import { v4 as uuidv4 } from "uuid";
 export default {
   name: "Ranking",
   data: function() {
@@ -96,21 +113,15 @@ export default {
       key: "",
       targets: [],
       target: "",
-      contents: {}
+      contents: {},
+      list_saved_data: [],
+      selected: []
     };
   },
   created: function() {
     const savedData = localStorage.getItem("default");
     if (savedData) {
-      const tmp = JSON.parse(savedData);
-      this.title = tmp.title;
-      this.contents = tmp.contents;
-      Object.keys(this.contents).forEach(k => {
-        this.keys.push({ key: k });
-        Object.keys(this.contents[k]).forEach(t => {
-          this.targets.push({ target: t });
-        });
-      });
+      this.load(savedData);
     }
   },
   computed: {
@@ -206,12 +217,61 @@ export default {
     slotname: function(field) {
       return "cell(" + field + ")";
     },
+    refresh_list: function() {
+      const savedData = JSON.parse(localStorage.getItem("myranking:uuids"));
+      this.list_saved_data = [];
+      if (savedData) {
+        Object.keys(savedData).forEach(k => {
+          const datum = savedData[k];
+          this.list_saved_data.push({
+            uuid: k,
+            title: datum
+          });
+        });
+      }
+    },
+    onRowSelected: function(items) {
+      this.selected = items;
+    },
+    load: function(savedData) {
+      const tmp = JSON.parse(savedData);
+      this.title = tmp.title;
+      this.contents = tmp.contents;
+      Object.keys(this.contents).forEach(k => {
+        this.keys.push({ key: k });
+        Object.keys(this.contents[k]).forEach(t => {
+          this.targets.push({ target: t });
+        });
+      });
+    },
+    loadData: function() {
+      if (this.selected.length != 1) {
+        alert("選択してください");
+        return;
+      }
+      const selected_uuid = this.selected[0].uuid;
+      const data = localStorage.getItem("myranking:data:" + selected_uuid);
+      this.load(data);
+    },
     save: function() {
       const saveData = {
         title: this.title,
         contents: this.contents
       };
-      localStorage.setItem("default", JSON.stringify(saveData));
+      if (!this.uuid) {
+        this.uuid = uuidv4();
+      }
+      localStorage.setItem(
+        "myranking:data:" + this.uuid,
+        JSON.stringify(saveData)
+      );
+      let uuids = JSON.parse(localStorage.getItem("myranking:uuids"));
+      if (!uuids) {
+        uuids = {};
+      }
+      uuids[this.uuid] = this.title;
+      localStorage.setItem("myranking:uuids", JSON.stringify(uuids));
+      alert("保存しました");
     },
     show_graph: function() {
       console.log(this.contents);
@@ -419,3 +479,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.title {
+  padding-left: 10pt;
+  padding-right: 10pt;
+}
+</style>
