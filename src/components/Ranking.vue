@@ -67,10 +67,10 @@
                 type="number"
                 placeholder="point"
               ></b-form-input>
-              <b-form-input
+              <b-form-textarea
                 v-model="contents[data.item.key][data.field.key].description"
                 placeholder="備考"
-              ></b-form-input>
+              ></b-form-textarea>
             </div>
           </template>
         </b-table>
