@@ -18,7 +18,6 @@
           <b-icon-trash v-on:click="remove_saved_data(row.index)"></b-icon-trash>
         </template>
       </b-table>
-      {{ this.selected }}
     </b-modal>
     <b-container>
       <div v-if="!edit_title">
@@ -170,17 +169,7 @@ export default {
       this.key = "";
     },
     move_key: function(index, diff) {
-      const targetId = index + diff;
-      if (targetId < 0 || targetId >= this.keys.length) {
-        return;
-      }
-      const sourceId = index;
-      const cloneArray = [...this.keys];
-      [cloneArray[targetId], cloneArray[sourceId]] = [
-        this.keys[sourceId],
-        this.keys[targetId]
-      ];
-      this.keys = cloneArray;
+      this.keys = this._move(this.keys, index, diff);
       return;
     },
     remove_key: function(index) {
@@ -197,18 +186,21 @@ export default {
       });
       this.target = "";
     },
-    move_target: function(index, diff) {
+
+    _move: function(data, index, diff) {
       const targetId = index + diff;
-      if (targetId < 0 || targetId >= this.targets.length) {
-        return;
+      if(targetId < 0 || targetId >= data.length){
+        return data;
       }
       const sourceId = index;
-      const cloneArray = [...this.targets];
+      const cloneArray  = [...data];
       [cloneArray[targetId], cloneArray[sourceId]] = [
-        this.targets[sourceId],
-        this.targets[targetId]
+        data[sourceId], data[targetId]
       ];
-      this.targets = cloneArray;
+      return cloneArray;
+    },
+    move_target: function(index, diff) {
+      this.targets = this._move(this.targets, index, diff);
       return;
     },
     remove_target: function(index) {
@@ -249,11 +241,15 @@ export default {
       const tmp = JSON.parse(savedData);
       this.title = tmp.title;
       this.contents = tmp.contents;
+      let loaded = false;
       Object.keys(this.contents).forEach(k => {
         this.keys.push({ key: k });
-        Object.keys(this.contents[k]).forEach(t => {
-          this.targets.push({ target: t });
-        });
+        if(!loaded){
+          Object.keys(this.contents[k]).forEach(t => {
+            this.targets.push({ target: t });
+          });
+          loaded = true;
+        }
       });
     },
     loadData: function() {
