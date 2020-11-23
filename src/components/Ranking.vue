@@ -7,12 +7,16 @@
       <b-table
         striped
         hover
+        :fields="saved_fields"
         :items="list_saved_data"
         show-empty
         selectable
         select-mode="single"
         @row-selected="onRowSelected"
       >
+        <template #cell(actions)="row">
+          <b-icon-trash v-on:click="remove_saved_data(row.index)"></b-icon-trash>
+        </template>
       </b-table>
       {{ this.selected }}
     </b-modal>
@@ -68,7 +72,7 @@
           </b-table>
         </div>
       </b-modal>
-      <div>
+      <div v-if="ranking_body.length > 0">
         <b-table striped hover :fields="ranking_header" :items="ranking_body">
           <template
             v-for="field in ranking_header"
@@ -94,6 +98,9 @@
         <b-button v-on:click="show_graph">Shwo graph</b-button>
         <div id="viz"></div>
       </div>
+      <div v-else>
+        No show Data
+      </div>
     </b-container>
   </div>
 </template>
@@ -109,6 +116,7 @@ export default {
     return {
       key_fields: ["key", "actions"],
       target_fields: ["target", "actions"],
+      saved_fields: ["title", "actions"],
       title: "Test",
       edit_title: false,
       keys: [],
@@ -212,6 +220,11 @@ export default {
       });
       cloneArray.splice(index, 1);
       this.targets = cloneArray;
+    },
+    remove_saved_data: function(index) {
+      const sd = this.list_saved_data[index];
+      storage.delete(sd.uuid);
+      this.refresh_list();
     },
     slotname: function(field) {
       return "cell(" + field + ")";

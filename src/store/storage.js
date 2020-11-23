@@ -34,4 +34,9 @@ export default class MyStorage {
     return localStorage.getItem("myranking:data:" + uuid);;
   }
 
+  delete(uuid){
+    let uuids = JSON.parse(localStorage.getItem("myranking:uuids"));
+    delete uuids[uuid];
+    localStorage.setItem("myranking:uuids", JSON.stringify(uuids));
+  }
 }
